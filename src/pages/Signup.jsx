@@ -1,46 +1,41 @@
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import React, { useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { auth, db } from '../config/Firebase'; 
+import { auth, db } from '../config/Firebase';
 import { setDoc, doc } from 'firebase/firestore';
-import { uploadImage } from '../config/FirebaseMethod'; 
+import { uploadImage } from '../config/FirebaseMethod';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Signup = () => {
     const navigate = useNavigate();
     const emailRef = useRef();
     const passwordRef = useRef();
-    const usernameRef = useRef(); 
+    const usernameRef = useRef();
     const [showPassword, setShowPassword] = useState(false);
-    const [error, setError] = useState('');
-    const [profileImage, setProfileImage] = useState(null); 
+    const [profileImage, setProfileImage] = useState(null);
 
     const newUser = async (e) => {
         e.preventDefault();
         const email = emailRef.current.value;
         const password = passwordRef.current.value;
-        const username = usernameRef.current.value; 
-
-
+        const username = usernameRef.current.value;
         const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailPattern.test(email)) {
-            setError('Please enter a valid email address');
+            toast.error('Please enter a valid email address');
             return;
         }
-
 
         if (password.length < 6) {
-            setError('Password must be at least 6 characters long');
+            toast.error('Password must be at least 6 characters long');
             return;
         }
-
-        setError(''); 
 
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
+            const imageUrl = await uploadImage(profileImage, user.uid);
 
-
-            const imageUrl = await uploadImage(profileImage, user.uid); 
             await setDoc(doc(db, 'users', user.uid), {
                 username,
                 email,
@@ -48,21 +43,22 @@ const Signup = () => {
                 imageUrl,
             });
 
-            console.log(user);
-            navigate('/login');
+            toast.success('Signup successful! Redirecting...');
+            setTimeout(() => navigate('/login'), 2000);
         } catch (error) {
-            const errorMessage = error.message;
-            console.log(errorMessage);
-            setError(errorMessage); 
+            if (error.code === 'auth/email-already-in-use') {
+                toast.error('This email is already exist. Please Try with different email');
+            } else {
+                toast.error(error.message);
+            }
         }
     };
 
     return (
         <>
             <div className='flex justify-center items-center mt-10'>
-                <div className='flex flex-col justify-center items-center w-[450px] min-h-[450px] rounded-2xl bg-gray-300 shadow-md shadow-black mx-20 px-10'>
+                <div className='flex flex-col justify-center items-center w-[450px] min-h-[500px] rounded-2xl bg-gray-300 shadow-md shadow-black mx-20 px-10'>
                     <h1 className='text-5xl font-bold'>Signup</h1>
-                    {error && <p className='text-red-500'>{error}</p>}
                     <form className='flex flex-col justify-center items-center w-full' onSubmit={newUser}>
                         <input
                             className='w-full mt-10 h-10 bg-transparent border-2 border-black rounded-xl p-3 outline-none text-black'
@@ -92,16 +88,21 @@ const Signup = () => {
                             </button>
                         </div>
                         <input
-                        className='w-full h-10 bg-transparent border-2 border-black rounded-xl p-3'
+                            className='w-full mt-5 h-[3.34rem] bg-transparent border-2 border-black rounded-xl p-3'
                             type="file"
                             accept="image/*"
-                            onChange={(e) => setProfileImage(e.target.files[0])} // Set the profile image
+                            onChange={(e) => setProfileImage(e.target.files[0])}
                         />
                         <button className="px-5 py-2 mt-5 rounded-lg bg-gray-400 font-medium text-xl border-2 border-black text-black hover:text-gray-400 hover:bg-black hover:border-gray-400">
                             Signup
                         </button>
-                        <p className='mt-2'>Already a User? <span className='text-indigo-700 cursor-pointer'><Link to={'/login'}>Login</Link></span></p>
+                        <p className='mt-2'>
+                            Already a User? <span className='text-indigo-700 cursor-pointer'>
+                                <Link to={'/login'}>Login</Link>
+                            </span>
+                        </p>
                     </form>
+                    <ToastContainer />
                 </div>
             </div>
         </>

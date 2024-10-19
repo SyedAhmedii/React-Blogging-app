@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
   const [profile, setProfile] = useState([]);
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -20,7 +20,7 @@ const Profile = () => {
       }
     });
 
-    return () => unsubscribe(); 
+    return () => unsubscribe();
   }, []);
 
   const editProfile = async (field, oldValue) => {
@@ -51,14 +51,16 @@ const Profile = () => {
 
   return (
     <>
-      <div className='text-black h-20 bg-white flex justify-between items-center px-5'>
-        <h1 className='text-3xl font-bold text-center'>Profile</h1>
-        <button 
-          onClick={handleLogout}
-          className='bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600'>
-          Logout
-        </button>
-      </div>
+      <header className="bg-gray-200 p-1">
+        <div className='text-black h-20 flex justify-between items-center px-5'>
+          <h1 className='text-3xl font-bold text-center'>Profile</h1>
+          <button
+            onClick={handleLogout}
+            className='bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600'>
+            Logout
+          </button>
+        </div>
+      </header>
 
       {profile.length > 0 ? profile.map((item) => (
         <div key={item.uid} className='min-h-[350px] lg:min-h-[400px] flex flex-col justify-start pt-10 items-center bg-white mt-10 mx-5 sm:mx-36 md:mx-44 lg:mx-72 xl:mx-96 2xl:mx-[500px] rounded-md'>

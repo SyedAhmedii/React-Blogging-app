@@ -8,6 +8,7 @@ import Profile from './pages/Profile'
 import Signup from './pages/Signup'
 import Dashboard from './pages/Dashboard'
 import ProtectedRoutes from './components/ProtectedRoutes'
+import UserData from './pages/UserData'
 
 
 const router = createBrowserRouter([
@@ -34,6 +35,10 @@ const router = createBrowserRouter([
             {
                 path: 'profile',
                 element: <ProtectedRoutes component={<Profile />} />
+            },
+            {
+                path: 'user/:userId', 
+                element: <ProtectedRoutes component={<UserData/>} />
             }
         ]
     },
